@@ -5,15 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class CurrentAccount implements Account {
 	
 	/*
-	 * use @Autowired if generating beans through annotations
-	 * comment it if you are using XML for configuration
+	 * use @Autowired for Dependency Injection through annotations
+	 * comment it if you are using XML for DI
 	 */
 	@Autowired
 	private Card card;
 	
+	public CurrentAccount() {
+	}
+	
 	/*
-	 * Required if using XML for configuration
-	 * Comment it if using Annotations 
+	 * Required if using XML for DI
+	 * Comment it if you are using Annotations for DI
 	 */
 	public CurrentAccount(Card card) {
 		this.card = card;
