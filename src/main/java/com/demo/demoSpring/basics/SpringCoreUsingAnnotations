@@ -1,0 +1,120 @@
+package com.demo.demoSpring.basics;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
+/*
+ * ---------------------------------------------------------------
+ * Account Interface and its two concrete implementations
+ * ---------------------------------------------------------------
+ */
+interface Account {
+	public String createAccount();
+	public String createCard();
+}
+
+class SavingAccount implements Account{
+	private Card card;
+	
+	@Override
+	public String createAccount() {
+		return "savings account creates";
+	}
+
+	@Override
+	public String createCard() {
+		// TODO Auto-generated method stub
+		return card.cardDetails();
+	}
+}
+
+class CurrentAccount implements Account {
+
+	@Autowired
+	private Card card;
+
+	@Override
+	public String createAccount() {
+		return "current account created";
+	}
+
+	@Override
+	public String createCard() {
+		return card.cardDetails();
+	}
+
+	public void onInit() {
+		// initializations etc
+		System.out.println("inside init");
+	}
+
+	public void onDestroy() {
+		// cleanup codes
+		System.out.println("inside destroy");
+	}
+}
+
+/*
+ * ---------------------------------------------------------------
+ * Card Interface and its two concrete implementations (credit card & debit card)
+ * ---------------------------------------------------------------
+ */
+
+interface Card {
+	public String cardDetails();
+}
+
+class DebitCard implements Card {
+
+	@Override
+	public String cardDetails() {
+		return "debit card issued";
+	}
+}
+
+class CreditCard implements Card {
+
+	@Override
+	public String cardDetails() {
+		return "credit card issued";
+	}
+}
+
+/*
+ * ---------------------------------------------------------------
+ * Configuration class where we register all the beans
+ * ---------------------------------------------------------------
+ */
+@Configuration
+class BankConfig {
+	
+	@Bean
+	public CreditCard getCreditCard() {
+		return new CreditCard();
+	}
+	
+	@Bean(initMethod = "onInit", destroyMethod = "onDestroy")
+	@Scope("prototype")
+	public CurrentAccount getCurrentAccount() {
+		return new CurrentAccount();
+	}
+}
+
+/*
+ * ---------------------------------------------------------------
+ * Driver class where we register all the beans
+ * ---------------------------------------------------------------
+ */
+class SpringCoreUsingAnnotations {
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BankConfig.class);
+		Account account = context.getBean("getCurrentAccount",Account.class);
+		System.out.println(account.createAccount());
+		System.out.println(account.createCard());
+		context.close();
+	}
+}

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /*
  * ---------------------------------------------------------------
@@ -34,9 +35,12 @@ class SavingAccount implements Account{
 
 class CurrentAccount implements Account {
 
-	@Autowired
 	private Card card;
-
+	
+	public CurrentAccount(Card card) {
+		this.card = card;
+	}
+	
 	@Override
 	public String createAccount() {
 		return "current account created";
@@ -86,35 +90,46 @@ class CreditCard implements Card {
 
 /*
  * ---------------------------------------------------------------
- * Configuration class where we register all the beans
+ * XML where we register all the beans
  * ---------------------------------------------------------------
  */
-@Configuration
-class BankConfig {
-	
-	@Bean
-	public CreditCard getCreditCard() {
-		return new CreditCard();
-	}
-	
-	@Bean(initMethod = "onInit", destroyMethod = "onDestroy")
-	@Scope("prototype")
-	public CurrentAccount getCurrentAccount() {
-		return new CurrentAccount();
-	}
-}
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd">
+    
+    <bean id="currentAcc" 
+    	  class="com.demo.demoSpring.model.CurrentAccount" 
+    	  scope="prototype"
+    	  init-method="onInit"
+    	  destroy-method="onDestroy">
+    	  <constructor-arg ref="creditCard" 
+    	  	type="com.demo.demoSpring.model.Card"/>
+    	  
+    </bean>
+    
+    <bean id="creditCard" 
+    	  class="com.demo.demoSpring.model.CreditCard"> 
+    </bean>
+</beans>
 
 /*
  * ---------------------------------------------------------------
  * Driver class where we register all the beans
  * ---------------------------------------------------------------
  */
-class SpringUsingAnnotations {
+class SpringCoreUsingXML {
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BankConfig.class);
-		Account account = context.getBean("getCurrentAccount",Account.class);
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+		Account account = context.getBean("currentAcc",Account.class);
 		System.out.println(account.createAccount());
 		System.out.println(account.createCard());
 		context.close();
 	}
 }
+
